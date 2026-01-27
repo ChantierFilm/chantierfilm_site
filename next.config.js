@@ -3,7 +3,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  images: { 
+  images: {
     unoptimized: true,
     remotePatterns: [
       {
@@ -11,6 +11,15 @@ const nextConfig = {
         hostname: 'img.youtube.com',
       },
     ],
+  },
+  async redirects() {
+    return [
+      {
+        source: '/prise-de-rendez-vous',
+        destination: '/rendez-vous',
+        permanent: true,
+      },
+    ];
   },
 };
 
