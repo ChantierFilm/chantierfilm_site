@@ -46,10 +46,10 @@ export function HeroSection() {
       <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-chantier-safety/5 rounded-full blur-3xl" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* LAYOUT MOBILE : Flexbox avec order */}
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-          
+
           {/* ORDRE 1 MOBILE : Titre + Sous-titre | DESKTOP : Colonne Gauche Complète */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -67,7 +67,7 @@ export function HeroSection() {
 
             {/* Sous-titre */}
             <p className="text-lg sm:text-xl text-chantier-concrete mb-8 leading-relaxed">
-              La solution de <strong>suivi de chantier</strong>, <strong>timelapse</strong> et <strong>drone</strong> dédiée aux pros du <strong>BTP</strong>. 
+              La solution de <strong>suivi de chantier</strong>, <strong>timelapse</strong> et <strong>drone</strong> dédiée aux pros du <strong>BTP</strong>.
               Visualisez l'avancement de vos travaux et valorisez votre savoir-faire technique.
             </p>
 
@@ -265,11 +265,10 @@ export function HeroSection() {
                   <button
                     key={index}
                     onClick={() => setCurrentTestimonial(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentTestimonial 
-                        ? 'bg-chantier-yellow w-8' 
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentTestimonial
+                        ? 'bg-chantier-yellow w-8'
                         : 'bg-chantier-yellow/30 hover:bg-chantier-yellow/50'
-                    }`}
+                      }`}
                     aria-label={`Aller au témoignage ${index + 1}`}
                   />
                 ))}
