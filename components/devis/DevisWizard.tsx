@@ -26,9 +26,9 @@ import RecapPanel from './RecapPanel';
 import { cn } from '@/lib/utils';
 
 const STEPS = [
-  'Durée du chantier',
-  'Caméras timelapse',
   'Reportage complet',
+  'Caméras timelapse',
+  'Durée du chantier',
   'Reportages complémentaires',
   'Coordonnées',
 ];
@@ -37,7 +37,7 @@ const INITIAL: DevisData = {
   months: 6,
   cameras: 1,
   camerasUnknown: false,
-  reportageComplet: false,
+  reportageComplet: true,
   reportagesComplementaires: 0,
   fullName: '',
   email: '',
@@ -65,9 +65,9 @@ export default function DevisWizard() {
   };
 
   const canNext = (): boolean => {
-    if (step === 0) return data.months >= MIN_MONTHS && data.months <= MAX_MONTHS;
+    if (step === 0) return true; // Reportage complet : toggle oui/non
     if (step === 1) return CAMERA_OPTIONS.includes(data.cameras as 1 | 2 | 3 | 4);
-    if (step === 2) return true;
+    if (step === 2) return data.months >= MIN_MONTHS && data.months <= MAX_MONTHS;
     if (step === 3)
       return (
         data.reportagesComplementaires >= 0 &&
@@ -164,43 +164,51 @@ export default function DevisWizard() {
         <Stepper steps={STEPS} current={step} completed={completed} />
 
         <div className="mt-8 min-h-[280px]">
-          {/* Étape 1 — Durée */}
+          {/* Étape 1 — Reportage complet */}
           {step === 0 && (
             <StepShell
-              icon={<Calendar className="w-6 h-6 text-chantier-yellow" />}
-              title="Durée estimée du chantier"
-              subtitle="Indiquez la durée prévue de votre chantier en mois."
+              icon={<Film className="w-6 h-6 text-chantier-yellow" />}
+              title="Reportage complet de chantier"
+              subtitle="La prestation phare de Chantier Film, incluse par défaut dans la plupart de nos projets. Vous pouvez la retirer si vous souhaitez uniquement le suivi timelapse."
             >
               <div className="space-y-6">
-                <div>
-                  <div className="flex items-baseline justify-between mb-3">
-                    <span className="text-sm font-semibold text-chantier-concrete">
-                      Nombre de mois
-                    </span>
-                    <span className="text-2xl font-extrabold text-chantier-asphalt">
-                      {data.months} mois
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min={MIN_MONTHS}
-                    max={MAX_MONTHS}
-                    value={data.months}
-                    onChange={(e) => update({ months: Number(e.target.value) })}
-                    className="w-full accent-chantier-yellow cursor-pointer"
-                    aria-label="Durée du chantier en mois"
+                <div className="grid grid-cols-2 gap-3">
+                  <ToggleCard
+                    active={data.reportageComplet}
+                    onClick={() => update({ reportageComplet: true })}
+                    label="Inclus"
+                    value={formatEuro(PRICING.reportageComplet)}
                   />
-                  <div className="flex justify-between text-xs text-chantier-steel mt-2">
-                    <span>{MIN_MONTHS} mois</span>
-                    <span>{MAX_MONTHS} mois</span>
-                  </div>
+                  <ToggleCard
+                    active={!data.reportageComplet}
+                    onClick={() => update({ reportageComplet: false })}
+                    label="Sans"
+                    value="—"
+                  />
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-chantier-light-grey">
-                  <p className="text-sm text-chantier-concrete">
-                    Durée sélectionnée :{' '}
-                    <span className="font-bold text-chantier-asphalt">{data.months} mois</span>
-                  </p>
-                </div>
+
+                <ul className="space-y-2 text-sm text-chantier-concrete bg-gray-50 rounded-lg p-4 border border-chantier-light-grey">
+                  <li className="flex items-start gap-2">
+                    <span className="text-chantier-yellow font-bold mt-0.5">•</span>
+                    <span><strong className="text-chantier-asphalt">Tournage en deux demi-journées</strong> sur site : une au lancement du chantier, une à la livraison.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-chantier-yellow font-bold mt-0.5">•</span>
+                    <span><strong className="text-chantier-asphalt">Captation drone 4K</strong> : vues aériennes du site et de son environnement.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-chantier-yellow font-bold mt-0.5">•</span>
+                    <span><strong className="text-chantier-asphalt">Montage et post-production</strong> : étalonnage, sound design, habillage graphique.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-chantier-yellow font-bold mt-0.5">•</span>
+                    <span><strong className="text-chantier-asphalt">Vidéo finale livrée</strong> : film de chantier complet prêt à diffuser (site web, réseaux, investisseurs).</span>
+                  </li>
+                </ul>
+
+                <p className="text-xs text-chantier-steel">
+                  Idéal pour valoriser votre projet de bout en bout et disposer d'un support de communication final professionnel.
+                </p>
               </div>
             </StepShell>
           )}
@@ -265,31 +273,43 @@ export default function DevisWizard() {
             </StepShell>
           )}
 
-          {/* Étape 3 — Reportage complet */}
+          {/* Étape 3 — Durée du chantier */}
           {step === 2 && (
             <StepShell
-              icon={<Film className="w-6 h-6 text-chantier-yellow" />}
-              title="Reportage complet de chantier"
-              subtitle="Captation en deux demi-journées (début + fin de chantier), montage, post-production, drone inclus."
+              icon={<Calendar className="w-6 h-6 text-chantier-yellow" />}
+              title="Durée estimée du chantier"
+              subtitle="Indiquez la durée prévue de votre chantier en mois. L'abonnement timelapse est calculé sur cette durée."
             >
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-3">
-                  <ToggleCard
-                    active={data.reportageComplet}
-                    onClick={() => update({ reportageComplet: true })}
-                    label="Oui"
-                    value={formatEuro(PRICING.reportageComplet)}
+                <div>
+                  <div className="flex items-baseline justify-between mb-3">
+                    <span className="text-sm font-semibold text-chantier-concrete">
+                      Nombre de mois
+                    </span>
+                    <span className="text-2xl font-extrabold text-chantier-asphalt">
+                      {data.months} mois
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={MIN_MONTHS}
+                    max={MAX_MONTHS}
+                    value={data.months}
+                    onChange={(e) => update({ months: Number(e.target.value) })}
+                    className="w-full accent-chantier-yellow cursor-pointer"
+                    aria-label="Durée du chantier en mois"
                   />
-                  <ToggleCard
-                    active={!data.reportageComplet}
-                    onClick={() => update({ reportageComplet: false })}
-                    label="Non"
-                    value="—"
-                  />
+                  <div className="flex justify-between text-xs text-chantier-steel mt-2">
+                    <span>{MIN_MONTHS} mois</span>
+                    <span>{MAX_MONTHS} mois</span>
+                  </div>
                 </div>
-                <p className="text-xs text-chantier-steel">
-                  Idéal pour documenter le chantier du début à la fin avec une production vidéo finale professionnelle.
-                </p>
+                <div className="bg-gray-50 rounded-lg p-4 border border-chantier-light-grey">
+                  <p className="text-sm text-chantier-concrete">
+                    Durée sélectionnée :{' '}
+                    <span className="font-bold text-chantier-asphalt">{data.months} mois</span>
+                  </p>
+                </div>
               </div>
             </StepShell>
           )}
