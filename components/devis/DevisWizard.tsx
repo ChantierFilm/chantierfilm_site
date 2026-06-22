@@ -35,7 +35,7 @@ const STEPS = [
 
 const INITIAL: DevisData = {
   months: 6,
-  cameras: 1,
+  cameras: 0,
   camerasUnknown: false,
   reportageComplet: true,
   reportagesComplementaires: 0,
@@ -66,7 +66,10 @@ export default function DevisWizard() {
 
   const canNext = (): boolean => {
     if (step === 0) return true; // Reportage complet : toggle oui/non
-    if (step === 1) return CAMERA_OPTIONS.includes(data.cameras as 1 | 2 | 3 | 4);
+    if (step === 1)
+      return (
+        (CAMERA_OPTIONS.includes(data.cameras as 1 | 2 | 3 | 4) || data.camerasUnknown)
+      );
     if (step === 2) return data.months >= MIN_MONTHS && data.months <= MAX_MONTHS;
     if (step === 3)
       return (

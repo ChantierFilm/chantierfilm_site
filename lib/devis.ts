@@ -79,7 +79,8 @@ export function buildDevisLines(d: DevisData): DevisLine[] {
 // Récap progressif : chaque ligne n'apparaît qu'une fois l'étape
 // où elle est choisie atteinte/dépassée.
 //   - Reportage complet : étape 0 (visible immédiatement, live)
-//   - Installation      : étape ≥ 2 (après validation des caméras)
+//   - Installation      : dès qu'un nombre de caméras est sélectionné
+//                         (étape 1 avec cameras>0 ou camerasUnknown)
 //   - Abonnement        : étape ≥ 2 (sur l'étape durée, live)
 //   - Reportages compl. : étape ≥ 3 (sur l'étape, live)
 export function buildDevisLinesForStep(d: DevisData, step: number): DevisLine[] {
@@ -88,8 +89,11 @@ export function buildDevisLinesForStep(d: DevisData, step: number): DevisLine[] 
     const rc = getReportageCompletLine(d);
     if (rc) lines.push(rc);
   }
-  if (step >= 2) {
+  const camerasChosen = d.camerasUnknown || d.cameras > 0;
+  if (camerasChosen) {
     lines.push(getInstallationLine());
+  }
+  if (step >= 2 && camerasChosen) {
     lines.push(getSubscriptionLine(d));
   }
   if (step >= 3) {
