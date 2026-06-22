@@ -66,15 +66,41 @@ export function getReportagesComplementairesLine(
 }
 
 export function buildDevisLines(d: DevisData): DevisLine[] {
-  const lines: DevisLine[] = [
-    getInstallationLine(),
-    getSubscriptionLine(d),
-  ];
+  const lines: DevisLine[] = [];
   const rc = getReportageCompletLine(d);
   if (rc) lines.push(rc);
+  lines.push(getInstallationLine());
+  lines.push(getSubscriptionLine(d));
   const rcomp = getReportagesComplementairesLine(d);
   if (rcomp) lines.push(rcomp);
   return lines;
+}
+
+// Récap progressif : chaque ligne n'apparaît qu'une fois l'étape
+// où elle est choisie atteinte/dépassée.
+//   - Reportage complet : étape 0 (visible immédiatement, live)
+//   - Installation      : étape ≥ 2 (après validation des caméras)
+//   - Abonnement        : étape ≥ 2 (sur l'étape durée, live)
+//   - Reportages compl. : étape ≥ 3 (sur l'étape, live)
+export function buildDevisLinesForStep(d: DevisData, step: number): DevisLine[] {
+  const lines: DevisLine[] = [];
+  if (step >= 0) {
+    const rc = getReportageCompletLine(d);
+    if (rc) lines.push(rc);
+  }
+  if (step >= 2) {
+    lines.push(getInstallationLine());
+    lines.push(getSubscriptionLine(d));
+  }
+  if (step >= 3) {
+    const rcomp = getReportagesComplementairesLine(d);
+    if (rcomp) lines.push(rcomp);
+  }
+  return lines;
+}
+
+export function computeTotalForStep(d: DevisData, step: number): number {
+  return buildDevisLinesForStep(d, step).reduce((sum, l) => sum + l.amount, 0);
 }
 
 export function computeTotal(d: DevisData): number {

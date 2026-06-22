@@ -2,17 +2,23 @@
 
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { DevisData, buildDevisLines, computeTotal, formatEuro } from '@/lib/devis';
+import {
+  DevisData,
+  buildDevisLinesForStep,
+  computeTotalForStep,
+  formatEuro,
+} from '@/lib/devis';
 import { cn } from '@/lib/utils';
 
 interface RecapPanelProps {
   data: DevisData;
+  step: number;
 }
 
-export default function RecapPanel({ data }: RecapPanelProps) {
+export default function RecapPanel({ data, step }: RecapPanelProps) {
   const [open, setOpen] = useState(false);
-  const lines = buildDevisLines(data);
-  const total = computeTotal(data);
+  const lines = buildDevisLinesForStep(data, step);
+  const total = computeTotalForStep(data, step);
   const hasContent = lines.length > 0;
 
   return (

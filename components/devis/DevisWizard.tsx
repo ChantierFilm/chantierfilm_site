@@ -484,7 +484,7 @@ export default function DevisWizard() {
       </div>
 
       {/* Colonne récap */}
-      <RecapPanel data={data} />
+      <RecapPanel data={data} step={step} />
     </div>
   );
 }
