@@ -97,6 +97,14 @@ export default function Footer() {
                   Nos Réalisations
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/devis"
+                  className="hover:text-chantier-yellow transition-colors inline-block"
+                >
+                  Devis en ligne
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
