@@ -23,7 +23,6 @@ export default function Navbar() {
     { href: '/', label: 'Accueil' },
     { href: '/rendez-vous/', label: 'Planifier un rendez-vous' },
     { href: '/realisations/', label: 'Nos Réalisations' },
-    { href: '/devis', label: 'Devis en ligne' },
   ];
 
   return (
