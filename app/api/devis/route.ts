@@ -5,9 +5,9 @@ import DevisNotificationEmail from '@/components/emails/DevisNotificationEmail';
 import {
   DevisData,
   MIN_MONTHS,
-  MAX_MONTHS,
-  MAX_REPORTAGES_COMPLEMENTAIRES,
-  CAMERA_OPTIONS,
+  MAX_MONTHS_CUSTOM,
+  MAX_CAMERAS,
+  MAX_REPORTAGES,
   computeTotal,
 } from '@/lib/devis';
 
@@ -53,16 +53,16 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!Number.isInteger(months) || months < MIN_MONTHS || months > MAX_MONTHS) {
+    if (!Number.isInteger(months) || months < MIN_MONTHS || months > MAX_MONTHS_CUSTOM) {
       return NextResponse.json(
-        { success: false, error: `La durée doit être entre ${MIN_MONTHS} et ${MAX_MONTHS} mois.` },
+        { success: false, error: `La durée doit être entre ${MIN_MONTHS} et ${MAX_MONTHS_CUSTOM} mois.` },
         { status: 400 }
       );
     }
 
-    if (!CAMERA_OPTIONS.includes(cameras as (typeof CAMERA_OPTIONS)[number])) {
+    if (!Number.isInteger(cameras) || cameras < 1 || cameras > MAX_CAMERAS) {
       return NextResponse.json(
-        { success: false, error: 'Le nombre de caméras est invalide.' },
+        { success: false, error: `Le nombre de caméras doit être entre 1 et ${MAX_CAMERAS}.` },
         { status: 400 }
       );
     }
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     if (
       !Number.isInteger(reportagesComplementaires) ||
       reportagesComplementaires < 0 ||
-      reportagesComplementaires > MAX_REPORTAGES_COMPLEMENTAIRES
+      reportagesComplementaires > MAX_REPORTAGES
     ) {
       return NextResponse.json(
         { success: false, error: 'Le nombre de reportages complémentaires est invalide.' },

@@ -17,7 +17,6 @@ import {
   CAMERA_OPTIONS,
   MIN_MONTHS,
   MAX_MONTHS,
-  MAX_REPORTAGES_COMPLEMENTAIRES,
   PRICING,
   formatEuro,
 } from '@/lib/devis';
@@ -67,15 +66,9 @@ export default function DevisWizard() {
   const canNext = (): boolean => {
     if (step === 0) return true; // Reportage complet : toggle oui/non
     if (step === 1)
-      return (
-        (CAMERA_OPTIONS.includes(data.cameras as 1 | 2 | 3 | 4) || data.camerasUnknown)
-      );
-    if (step === 2) return data.months >= MIN_MONTHS && data.months <= MAX_MONTHS;
-    if (step === 3)
-      return (
-        data.reportagesComplementaires >= 0 &&
-        data.reportagesComplementaires <= MAX_REPORTAGES_COMPLEMENTAIRES
-      );
+      return data.cameras > 0 || data.camerasUnknown;
+    if (step === 2) return data.months >= MIN_MONTHS;
+    if (step === 3) return data.reportagesComplementaires >= 0;
     return false;
   };
 
@@ -243,6 +236,35 @@ export default function DevisWizard() {
                 </div>
                 <button
                   type="button"
+                  onClick={() => update({ cameras: 5, camerasUnknown: false })}
+                  className={cn(
+                    'w-full text-left p-4 rounded-lg border-2 transition-all',
+                    !data.camerasUnknown && !CAMERA_OPTIONS.includes(data.cameras as 1 | 2 | 3 | 4) && data.cameras > 0
+                      ? 'bg-chantier-yellow/10 border-chantier-yellow'
+                      : 'bg-white border-chantier-light-grey hover:border-chantier-yellow'
+                  )}
+                >
+                  <span className="block font-semibold text-chantier-asphalt">
+                    Autre...
+                  </span>
+                </button>
+                {!data.camerasUnknown && !CAMERA_OPTIONS.includes(data.cameras as 1 | 2 | 3 | 4) && data.cameras > 0 && (
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      min={1}
+                      value={data.cameras}
+                      onChange={(e) => {
+                        const v = Math.max(1, Number(e.target.value));
+                        update({ cameras: v });
+                      }}
+                      className={cn(inputClass, 'w-24 text-center text-lg font-bold')}
+                    />
+                    <span className="text-sm text-chantier-concrete">caméras</span>
+                  </div>
+                )}
+                <button
+                  type="button"
                   onClick={() => update({ cameras: 1, camerasUnknown: true })}
                   className={cn(
                     'w-full text-left p-4 rounded-lg border-2 transition-all',
@@ -284,29 +306,64 @@ export default function DevisWizard() {
               subtitle="Indiquez la durée prévue de votre chantier en mois. L'abonnement timelapse est calculé sur cette durée."
             >
               <div className="space-y-6">
-                <div>
-                  <div className="flex items-baseline justify-between mb-3">
-                    <span className="text-sm font-semibold text-chantier-concrete">
-                      Nombre de mois
-                    </span>
-                    <span className="text-2xl font-extrabold text-chantier-asphalt">
-                      {data.months} mois
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min={MIN_MONTHS}
-                    max={MAX_MONTHS}
-                    value={data.months}
-                    onChange={(e) => update({ months: Number(e.target.value) })}
-                    className="w-full accent-chantier-yellow cursor-pointer"
-                    aria-label="Durée du chantier en mois"
-                  />
-                  <div className="flex justify-between text-xs text-chantier-steel mt-2">
-                    <span>{MIN_MONTHS} mois</span>
-                    <span>{MAX_MONTHS} mois</span>
-                  </div>
-                </div>
+                {data.months <= MAX_MONTHS ? (
+                  <>
+                    <div>
+                      <div className="flex items-baseline justify-between mb-3">
+                        <span className="text-sm font-semibold text-chantier-concrete">
+                          Nombre de mois
+                        </span>
+                        <span className="text-2xl font-extrabold text-chantier-asphalt">
+                          {data.months} mois
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={MIN_MONTHS}
+                        max={MAX_MONTHS}
+                        value={data.months}
+                        onChange={(e) => update({ months: Number(e.target.value) })}
+                        className="w-full accent-chantier-yellow cursor-pointer"
+                        aria-label="Durée du chantier en mois"
+                      />
+                      <div className="flex justify-between text-xs text-chantier-steel mt-2">
+                        <span>{MIN_MONTHS} mois</span>
+                        <span>{MAX_MONTHS} mois</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => update({ months: MAX_MONTHS + 1 })}
+                      className="text-sm text-chantier-yellow underline hover:no-underline font-medium"
+                    >
+                      Plus de {MAX_MONTHS} mois
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3 justify-center">
+                      <input
+                        type="number"
+                        min={1}
+                        value={data.months}
+                        onChange={(e) => {
+                          const v = Math.max(1, Number(e.target.value));
+                          update({ months: v });
+                        }}
+                        className={cn(inputClass, 'w-24 text-center text-lg font-bold')}
+                        aria-label="Durée du chantier en mois"
+                      />
+                      <span className="text-sm text-chantier-concrete">mois</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => update({ months: MAX_MONTHS })}
+                      className="text-sm text-chantier-yellow underline hover:no-underline font-medium"
+                    >
+                      Revenir au curseur
+                    </button>
+                  </>
+                )}
                 <div className="bg-gray-50 rounded-lg p-4 border border-chantier-light-grey">
                   <p className="text-sm text-chantier-concrete">
                     Durée sélectionnée :{' '}
@@ -349,31 +406,20 @@ export default function DevisWizard() {
                       {data.reportagesComplementaires} × {formatEuro(PRICING.reportageComplementaire)}
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      update({
-                        reportagesComplementaires: Math.min(
-                          MAX_REPORTAGES_COMPLEMENTAIRES,
-                          data.reportagesComplementaires + 1
-                        ),
-                      })
-                    }
-                    className="w-11 h-11 rounded-lg border-2 border-chantier-light-grey text-chantier-asphalt font-bold text-xl hover:border-chantier-yellow transition-colors"
-                    aria-label="Augmenter"
-                  >
-                    +
-                  </button>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={MAX_REPORTAGES_COMPLEMENTAIRES}
-                  value={data.reportagesComplementaires}
-                  onChange={(e) => update({ reportagesComplementaires: Number(e.target.value) })}
-                  className="w-full accent-chantier-yellow cursor-pointer"
-                  aria-label="Nombre de reportages complémentaires"
-                />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        update({
+                          reportagesComplementaires: data.reportagesComplementaires + 1,
+                        })
+                      }
+                      className="w-11 h-11 rounded-lg border-2 border-chantier-light-grey text-chantier-asphalt font-bold text-xl hover:border-chantier-yellow transition-colors"
+                      aria-label="Augmenter"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-gradient-to-r from-transparent via-chantier-yellow/40 to-transparent" />
               </div>
             </StepShell>
           )}
