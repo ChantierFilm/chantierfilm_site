@@ -17,7 +17,8 @@ import {
   CAMERA_OPTIONS,
   MIN_MONTHS,
   MAX_MONTHS,
-  MAX_REPORTAGES_COMPLEMENTAIRES,
+  MAX_CAMERAS,
+  MAX_MONTHS_CUSTOM,
   PRICING,
   formatEuro,
 } from '@/lib/devis';
@@ -50,6 +51,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function DevisWizard() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<DevisData>(INITIAL);
+  const [cameraCustom, setCameraCustom] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -67,15 +69,9 @@ export default function DevisWizard() {
   const canNext = (): boolean => {
     if (step === 0) return true; // Reportage complet : toggle oui/non
     if (step === 1)
-      return (
-        (CAMERA_OPTIONS.includes(data.cameras as 1 | 2 | 3 | 4) || data.camerasUnknown)
-      );
-    if (step === 2) return data.months >= MIN_MONTHS && data.months <= MAX_MONTHS;
-    if (step === 3)
-      return (
-        data.reportagesComplementaires >= 0 &&
-        data.reportagesComplementaires <= MAX_REPORTAGES_COMPLEMENTAIRES
-      );
+      return data.cameras > 0 || data.camerasUnknown;
+    if (step === 2) return data.months >= MIN_MONTHS;
+    if (step === 3) return data.reportagesComplementaires >= 0;
     return false;
   };
 
@@ -128,6 +124,7 @@ export default function DevisWizard() {
 
   const reset = () => {
     setData(INITIAL);
+    setCameraCustom(false);
     setStep(0);
     setError(null);
     setSuccess(false);
@@ -224,15 +221,18 @@ export default function DevisWizard() {
               subtitle="Forfait d'installation unique, quel que soit le nombre de caméras."
             >
               <div className="space-y-6">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                   {CAMERA_OPTIONS.map((n) => (
                     <button
                       key={n}
                       type="button"
-                      onClick={() => update({ cameras: n, camerasUnknown: false })}
+                      onClick={() => {
+                        setCameraCustom(false);
+                        update({ cameras: n, camerasUnknown: false });
+                      }}
                       className={cn(
                         'py-4 rounded-lg border-2 font-bold text-lg transition-all',
-                        !data.camerasUnknown && data.cameras === n
+                        !data.camerasUnknown && !cameraCustom && data.cameras === n
                           ? 'bg-chantier-yellow border-chantier-yellow text-chantier-asphalt shadow-industrial'
                           : 'bg-white border-chantier-light-grey text-chantier-asphalt hover:border-chantier-yellow'
                       )}
@@ -240,10 +240,47 @@ export default function DevisWizard() {
                       {n}
                     </button>
                   ))}
+                  {cameraCustom && !data.camerasUnknown ? (
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoFocus
+                      maxLength={3}
+                      value={data.cameras === 0 ? '' : data.cameras}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, '');
+                        update({
+                          cameras: raw === '' ? 0 : Math.min(parseInt(raw, 10), MAX_CAMERAS),
+                          camerasUnknown: false,
+                        });
+                      }}
+                      aria-label="Nombre de caméras personnalisé"
+                      className="py-4 rounded-lg border-2 border-chantier-yellow bg-chantier-yellow text-chantier-asphalt shadow-industrial text-center font-bold text-lg focus:outline-none focus:ring-2 focus:ring-chantier-yellow-dark"
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCameraCustom(true);
+                        update({ cameras: Math.max(data.cameras, 5), camerasUnknown: false });
+                      }}
+                      className="py-4 rounded-lg border-2 bg-white border-chantier-light-grey text-chantier-asphalt hover:border-chantier-yellow font-bold text-lg transition-all"
+                    >
+                      5+
+                    </button>
+                  )}
                 </div>
+                {cameraCustom && !data.camerasUnknown && (
+                  <p className="text-xs text-chantier-steel italic">
+                    Saisissez le nombre exact de caméras souhaité.
+                  </p>
+                )}
                 <button
                   type="button"
-                  onClick={() => update({ cameras: 1, camerasUnknown: true })}
+                  onClick={() => {
+                    setCameraCustom(false);
+                    update({ cameras: 1, camerasUnknown: true });
+                  }}
                   className={cn(
                     'w-full text-left p-4 rounded-lg border-2 transition-all',
                     data.camerasUnknown
@@ -285,34 +322,48 @@ export default function DevisWizard() {
             >
               <div className="space-y-6">
                 <div>
-                  <div className="flex items-baseline justify-between mb-3">
+                  <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-semibold text-chantier-concrete">
                       Nombre de mois
                     </span>
-                    <span className="text-2xl font-extrabold text-chantier-asphalt">
-                      {data.months} mois
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={3}
+                        value={data.months === 0 ? '' : data.months}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\D/g, '');
+                          update({
+                            months: raw === '' ? 0 : Math.min(parseInt(raw, 10), MAX_MONTHS_CUSTOM),
+                          });
+                        }}
+                        onBlur={() => {
+                          if (data.months < MIN_MONTHS) update({ months: MIN_MONTHS });
+                        }}
+                        aria-label="Durée du chantier en mois"
+                        className="w-20 px-2 py-1 text-center text-2xl font-extrabold text-chantier-asphalt bg-gray-50 border border-chantier-light-grey rounded-lg focus:outline-none focus:ring-2 focus:ring-chantier-yellow focus:border-transparent transition-all"
+                      />
+                      <span className="text-2xl font-extrabold text-chantier-asphalt">mois</span>
+                    </div>
                   </div>
                   <input
                     type="range"
                     min={MIN_MONTHS}
                     max={MAX_MONTHS}
-                    value={data.months}
+                    value={Math.min(Math.max(data.months, MIN_MONTHS), MAX_MONTHS)}
                     onChange={(e) => update({ months: Number(e.target.value) })}
                     className="w-full accent-chantier-yellow cursor-pointer"
-                    aria-label="Durée du chantier en mois"
+                    aria-label="Durée du chantier en mois (curseur)"
                   />
                   <div className="flex justify-between text-xs text-chantier-steel mt-2">
                     <span>{MIN_MONTHS} mois</span>
                     <span>{MAX_MONTHS} mois</span>
                   </div>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-chantier-light-grey">
-                  <p className="text-sm text-chantier-concrete">
-                    Durée sélectionnée :{' '}
-                    <span className="font-bold text-chantier-asphalt">{data.months} mois</span>
-                  </p>
-                </div>
+                <p className="text-xs text-chantier-steel">
+                  Au-delà de {MAX_MONTHS} mois, saisissez directement la durée souhaitée dans le champ ci-dessus.
+                </p>
               </div>
             </StepShell>
           )}
@@ -349,31 +400,20 @@ export default function DevisWizard() {
                       {data.reportagesComplementaires} × {formatEuro(PRICING.reportageComplementaire)}
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      update({
-                        reportagesComplementaires: Math.min(
-                          MAX_REPORTAGES_COMPLEMENTAIRES,
-                          data.reportagesComplementaires + 1
-                        ),
-                      })
-                    }
-                    className="w-11 h-11 rounded-lg border-2 border-chantier-light-grey text-chantier-asphalt font-bold text-xl hover:border-chantier-yellow transition-colors"
-                    aria-label="Augmenter"
-                  >
-                    +
-                  </button>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={MAX_REPORTAGES_COMPLEMENTAIRES}
-                  value={data.reportagesComplementaires}
-                  onChange={(e) => update({ reportagesComplementaires: Number(e.target.value) })}
-                  className="w-full accent-chantier-yellow cursor-pointer"
-                  aria-label="Nombre de reportages complémentaires"
-                />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        update({
+                          reportagesComplementaires: data.reportagesComplementaires + 1,
+                        })
+                      }
+                      className="w-11 h-11 rounded-lg border-2 border-chantier-light-grey text-chantier-asphalt font-bold text-xl hover:border-chantier-yellow transition-colors"
+                      aria-label="Augmenter"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-gradient-to-r from-transparent via-chantier-yellow/40 to-transparent" />
               </div>
             </StepShell>
           )}

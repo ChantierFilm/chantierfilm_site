@@ -9,11 +9,13 @@ export const PRICING = {
 export const CAMERA_OPTIONS = [1, 2, 3, 4] as const;
 export const MAX_MONTHS = 36;
 export const MIN_MONTHS = 1;
-export const MAX_REPORTAGES_COMPLEMENTAIRES = 5;
+export const MAX_CAMERAS = 999;
+export const MAX_MONTHS_CUSTOM = 999;
+export const MAX_REPORTAGES = 999;
 
 export interface DevisData {
   months: number;
-  cameras: number; // 1-4 (1 par défaut si "je ne sais pas")
+  cameras: number;
   camerasUnknown: boolean;
   reportageComplet: boolean;
   reportagesComplementaires: number;
