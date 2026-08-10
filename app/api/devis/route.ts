@@ -10,11 +10,16 @@ import {
   MAX_REPORTAGES,
   computeTotal,
 } from '@/lib/devis';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const FROM = 'Chantier Film <contact@chantierfilm.com>';
 const INTERNAL_TO = 'contact@chantierfilm.com';
+
+// 5 demandes max par IP et par tranche de 10 minutes
+const RATE_LIMIT = 5;
+const RATE_WINDOW_MS = 10 * 60 * 1000;
 
 function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -28,7 +33,25 @@ function isValidEmail(email: string): boolean {
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const limit = rateLimit(`devis:${ip}`, RATE_LIMIT, RATE_WINDOW_MS);
+    if (!limit.success) {
+      return NextResponse.json(
+        { success: false, error: 'Trop de demandes envoyées. Veuillez réessayer dans quelques minutes.' },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }
+      );
+    }
+
     const body = await request.json();
+
+    // Honeypot anti-spam : champ invisible rempli uniquement par les bots.
+    // On simule un succès pour ne pas leur signaler le blocage.
+    if (typeof body?.website === 'string' && body.website.trim().length > 0) {
+      return NextResponse.json({
+        success: true,
+        message: 'Votre estimation a été envoyée par mail.',
+      });
+    }
 
     const months = Number(body?.months);
     const cameras = Number(body?.cameras);

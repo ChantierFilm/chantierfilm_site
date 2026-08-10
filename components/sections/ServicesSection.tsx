@@ -7,7 +7,7 @@ const fadeInUp = {
   initial: { opacity: 0, y: 40 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-80px" },
-  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as any }
+  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }
 };
 
 const services = [
@@ -64,10 +64,10 @@ export function ServicesSection() {
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
-              transition={{ 
-                duration: 0.7, 
+              transition={{
+                duration: 0.7,
                 delay: service.delay,
-                ease: [0.22, 1, 0.36, 1] as any
+                ease: [0.22, 1, 0.36, 1] as const
               }}
               className="group relative bg-gray-50 border border-gray-200 rounded-xl p-8 hover:border-chantier-yellow hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
             >

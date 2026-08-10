@@ -8,7 +8,8 @@ export function ContactSection() {
     name: '',
     email: '',
     phone: '',
-    description: ''
+    description: '',
+    website: '' // honeypot anti-spam (doit rester vide)
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{
@@ -58,7 +59,7 @@ export function ContactSection() {
           message: 'Merci pour votre demande ! Nous vous recontacterons sous 48h ouvrées.'
         });
         // Reset du formulaire après succès
-        setFormData({ name: '', email: '', phone: '', description: '' });
+        setFormData({ name: '', email: '', phone: '', description: '', website: '' });
         
         // Auto-clear du message de succès après 10 secondes
         setTimeout(() => {
@@ -186,28 +187,48 @@ export function ContactSection() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Honeypot anti-spam : invisible pour les humains, ne jamais remplir */}
+                <div className="absolute -left-[9999px] -top-[9999px] h-0 w-0 overflow-hidden opacity-0" aria-hidden="true">
+                  <label htmlFor="contact-website">Site web</label>
+                  <input
+                    type="text"
+                    id="contact-website"
+                    name="website"
+                    value={formData.website}
+                    onChange={handleChange}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
+
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
+                    <label htmlFor="contact-name" className="sr-only">Nom (obligatoire)</label>
                     <input
                       type="text"
+                      id="contact-name"
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="*Nom"
                       required
+                      aria-required="true"
                       disabled={isSubmitting}
                       maxLength={100}
                       className="w-full px-4 py-3 bg-gray-50 border border-chantier-light-grey rounded-lg focus:outline-none focus:ring-2 focus:ring-chantier-yellow focus:border-transparent transition-all text-chantier-asphalt placeholder:text-chantier-steel disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                   </div>
                   <div>
+                    <label htmlFor="contact-email" className="sr-only">Email (obligatoire)</label>
                     <input
                       type="email"
+                      id="contact-email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="*Email"
                       required
+                      aria-required="true"
                       disabled={isSubmitting}
                       className="w-full px-4 py-3 bg-gray-50 border border-chantier-light-grey rounded-lg focus:outline-none focus:ring-2 focus:ring-chantier-yellow focus:border-transparent transition-all text-chantier-asphalt placeholder:text-chantier-steel disabled:opacity-50 disabled:cursor-not-allowed"
                     />
@@ -215,19 +236,24 @@ export function ContactSection() {
                 </div>
 
                 <div>
+                  <label htmlFor="contact-phone" className="sr-only">Téléphone (optionnel)</label>
                   <input
                     type="tel"
+                    id="contact-phone"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="Téléphone"
                     disabled={isSubmitting}
+                    maxLength={25}
                     className="w-full px-4 py-3 bg-gray-50 border border-chantier-light-grey rounded-lg focus:outline-none focus:ring-2 focus:ring-chantier-yellow focus:border-transparent transition-all text-chantier-asphalt placeholder:text-chantier-steel disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
 
                 <div>
+                  <label htmlFor="contact-description" className="sr-only">Description de votre projet (optionnel)</label>
                   <textarea
+                    id="contact-description"
                     name="description"
                     value={formData.description}
                     onChange={handleChange}

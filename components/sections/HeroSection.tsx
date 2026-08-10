@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Video, Plane, FileSearch, Calendar, Star, ArrowRight } from 'lucide-react';
@@ -8,6 +8,8 @@ import { useState, useEffect } from 'react';
 
 export function HeroSection() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [isCarouselPaused, setIsCarouselPaused] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   const features = [
     {
@@ -30,14 +32,17 @@ export function HeroSection() {
     "Le suivi en timelapse est d'une précision remarquable, un vrai plus pour notre communication."
   ];
 
-  // Carousel automatique
+  // Carousel automatique : mis en pause au survol/focus et désactivé
+  // si l'utilisateur préfère réduire les animations.
   useEffect(() => {
+    if (isCarouselPaused || shouldReduceMotion) return;
+
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [testimonials.length]);
+  }, [testimonials.length, isCarouselPaused, shouldReduceMotion]);
 
   return (
     <section className="relative bg-gradient-to-br from-chantier-off-white via-white to-chantier-light-grey overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
@@ -151,8 +156,10 @@ export function HeroSection() {
                 alt="Vue panoramique chantier construction gros œuvre - Solution complète suivi audiovisuel et archives vidéo pour entreprises BTP"
                 width={600}
                 height={400}
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="w-full h-auto object-cover"
                 priority
+                fetchPriority="high"
               />
               {/* Effet grain subtil */}
               <div className="absolute inset-0 bg-gradient-to-t from-chantier-asphalt/5 to-transparent pointer-events-none" />
@@ -235,29 +242,37 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 1.2 }}
             className="w-full order-5 lg:col-span-2 lg:order-5 flex justify-center"
           >
-            <div className="w-full max-w-2xl bg-chantier-yellow/10 backdrop-blur-sm p-6 rounded-lg border border-chantier-yellow/20 relative overflow-hidden">
+            <div
+              className="w-full max-w-2xl bg-chantier-yellow/10 backdrop-blur-sm p-6 rounded-lg border border-chantier-yellow/20 relative overflow-hidden"
+              onMouseEnter={() => setIsCarouselPaused(true)}
+              onMouseLeave={() => setIsCarouselPaused(false)}
+              onFocus={() => setIsCarouselPaused(true)}
+              onBlur={() => setIsCarouselPaused(false)}
+            >
               {/* Étoiles fixes */}
-              <div className="flex items-center justify-center gap-1 mb-4">
+              <div className="flex items-center justify-center gap-1 mb-4" aria-hidden="true">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-5 h-5 fill-chantier-yellow text-chantier-yellow" />
                 ))}
               </div>
 
               {/* Carousel avec AnimatePresence */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentTestimonial}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.6 }}
-                  className="text-center"
-                >
-                  <p className="text-base sm:text-lg text-chantier-asphalt italic leading-relaxed px-4">
-                    "{testimonials[currentTestimonial]}"
-                  </p>
-                </motion.div>
-              </AnimatePresence>
+              <div aria-live="polite" aria-atomic="true">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentTestimonial}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.6 }}
+                    className="text-center"
+                  >
+                    <p className="text-base sm:text-lg text-chantier-asphalt italic leading-relaxed px-4">
+                      "{testimonials[currentTestimonial]}"
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
 
               {/* Indicateurs de carousel */}
               <div className="flex justify-center gap-2 mt-6">

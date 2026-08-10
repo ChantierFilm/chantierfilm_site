@@ -52,6 +52,7 @@ export default function DevisWizard() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<DevisData>(INITIAL);
   const [cameraCustom, setCameraCustom] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -106,7 +107,7 @@ export default function DevisWizard() {
       const res = await fetch('/api/devis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, website: honeypot }),
       });
       const result = await res.json();
       if (res.ok && result.success) {
@@ -125,6 +126,7 @@ export default function DevisWizard() {
   const reset = () => {
     setData(INITIAL);
     setCameraCustom(false);
+    setHoneypot('');
     setStep(0);
     setError(null);
     setSuccess(false);
@@ -426,6 +428,19 @@ export default function DevisWizard() {
               subtitle="Recevez votre estimation par mail. Notre équipe vous recontacte sous 48h ouvrées."
             >
               <div className="space-y-4">
+                {/* Honeypot anti-spam : invisible pour les humains, ne jamais remplir */}
+                <div className="absolute -left-[9999px] -top-[9999px] h-0 w-0 overflow-hidden opacity-0" aria-hidden="true">
+                  <label htmlFor="devis-website">Site web</label>
+                  <input
+                    type="text"
+                    id="devis-website"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
+
                 <Field label="Nom complet" required>
                   <input
                     type="text"
@@ -443,10 +458,14 @@ export default function DevisWizard() {
                     maxLength={254}
                     onChange={(e) => update({ email: e.target.value })}
                     placeholder="jean.dupont@entreprise.fr"
+                    aria-invalid={data.email.length > 0 && !emailRegex.test(data.email)}
+                    aria-describedby="devis-email-error"
                     className={inputClass}
                   />
                   {data.email.length > 0 && !emailRegex.test(data.email) && (
-                    <p className="text-xs text-red-600 mt-1">Format d'email invalide.</p>
+                    <p id="devis-email-error" role="alert" className="text-xs text-red-600 mt-1">
+                      Format d'email invalide.
+                    </p>
                   )}
                 </Field>
                 <Field label="Entreprise (optionnel)">

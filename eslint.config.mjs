@@ -1,0 +1,18 @@
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
+
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  globalIgnores(['.next/**', 'node_modules/**', 'out/**', 'next-env.d.ts']),
+  {
+    rules: {
+      // Le français utilise massivement apostrophes et guillemets dans le
+      // texte JSX : on ne conserve que les interdictions réellement risquées.
+      'react/no-unescaped-entities': ['error', { forbid: ['>', '}'] }],
+    },
+  },
+]);
+
+export default eslintConfig;

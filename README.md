@@ -8,12 +8,12 @@ Ce dépôt contient le code source du site officiel de **Chantier Film**. L'obje
 
 Architecture clonée et optimisée depuis le core Nuit Blanche, basée sur la performance (SSR) et la fiabilité :
 
-* **Core:** [Next.js 14](https://nextjs.org/) (App Router)
+* **Core:** [Next.js 16](https://nextjs.org/) (App Router) + React 19
 * **Langage:** TypeScript
 * **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-* **Composants UI:** [Shadcn UI](https://ui.shadcn.com/) (Radix Primitives)
 * **Icônes:** Lucide React
 * **Animation:** Framer Motion (Subtil & Pro)
+* **Emails:** Resend + React Email
 * **Déploiement:** Vercel
 
 ## 🎯 Objectifs du Site (Business First)
