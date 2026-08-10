@@ -51,8 +51,9 @@ export default function RealisationsPage() {
           <iframe
             key={currentVideo.id}
             className="absolute inset-0 w-full h-full"
-            src={`https://www.youtube.com/embed/${currentVideo.id}?rel=0&modestbranding=1`}
+            src={`https://www.youtube-nocookie.com/embed/${currentVideo.id}?rel=0&modestbranding=1`}
             title={currentVideo.title}
+            loading="lazy"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
@@ -85,7 +86,7 @@ export default function RealisationsPage() {
           Sélection de Réalisations
         </h3>
 
-        <div className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-[#FFD700] scrollbar-track-[#1A1A1A]">
+        <div className="overflow-x-auto pb-4">
           <div className="flex gap-4 min-w-min">
             {videos.map((video, index) => {
               const isActive = video.id === currentVideo.id;
@@ -99,7 +100,7 @@ export default function RealisationsPage() {
                   onClick={() => setCurrentVideo(video)}
                   className={`flex-shrink-0 w-80 group relative rounded-lg overflow-hidden transition-all duration-300 ${isActive
                     ? 'ring-4 ring-[#FFD700] scale-105 shadow-2xl'
-                    : 'ring-2 ring-transparent hover:ring-[#FFD700] hover:scale-102 opacity-60 hover:opacity-100'
+                    : 'ring-2 ring-transparent hover:ring-[#FFD700] hover:scale-105 opacity-60 hover:opacity-100'
                     }`}
                 >
                   {/* Thumbnail */}
@@ -107,6 +108,8 @@ export default function RealisationsPage() {
                     <img
                       src={`https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`}
                       alt={video.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                     />
 

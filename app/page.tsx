@@ -5,10 +5,16 @@ import { BeforeAfterSection } from '@/components/sections/BeforeAfterSection';
 import { ProcessSection } from '@/components/sections/ProcessSection';
 import { ContactSection } from '@/components/sections/ContactSection';
 import { SectionSeparator } from '@/components/ui/SectionSeparator';
+import { WebPageJsonLd } from '@/components/JsonLd';
 
 export default function Home() {
   return (
     <main className="bg-chantier-off-white min-h-screen">
+      <WebPageJsonLd
+        path="/"
+        name="Chantier Film - Immortalisez Votre Chantier en Vidéo"
+        description="La solution de suivi de chantier, timelapse et drone dédiée aux pros du BTP. Visualisez l'avancement de vos travaux et valorisez votre savoir-faire technique."
+      />
       {/* Hero Section - Premier point de contact */}
       <HeroSection />
       

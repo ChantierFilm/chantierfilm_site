@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 
 export function BeforeAfterSection() {
@@ -8,46 +8,75 @@ export function BeforeAfterSection() {
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleMove = (clientX: number) => {
+  const handleMove = useCallback((clientX: number) => {
     if (!containerRef.current) return;
-    
+
     const rect = containerRef.current.getBoundingClientRect();
     const x = clientX - rect.left;
     const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    
+
     setSliderPosition(percentage);
-  };
+  }, []);
 
   const handleMouseDown = () => {
     setIsDragging(true);
-  };
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
-    handleMove(e.clientX);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleTouchMove = (e: TouchEvent) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    handleMove(e.touches[0].clientX);
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     handleMove(e.clientX);
   };
 
-  useEffect(() => {
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      document.addEventListener('touchmove', handleTouchMove, { passive: false });
-      document.addEventListener('touchend', handleMouseUp);
+  // Accessibilité clavier : flèches, PageUp/PageDown, Home/End
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const step = e.key.startsWith('Page') ? 10 : 2;
+    switch (e.key) {
+      case 'ArrowLeft':
+      case 'ArrowDown':
+        e.preventDefault();
+        setSliderPosition((p) => Math.max(0, p - step));
+        break;
+      case 'ArrowRight':
+      case 'ArrowUp':
+        e.preventDefault();
+        setSliderPosition((p) => Math.min(100, p + step));
+        break;
+      case 'PageDown':
+        e.preventDefault();
+        setSliderPosition((p) => Math.max(0, p - step));
+        break;
+      case 'PageUp':
+        e.preventDefault();
+        setSliderPosition((p) => Math.min(100, p + step));
+        break;
+      case 'Home':
+        e.preventDefault();
+        setSliderPosition(0);
+        break;
+      case 'End':
+        e.preventDefault();
+        setSliderPosition(100);
+        break;
     }
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      handleMove(e.clientX);
+    };
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      handleMove(e.touches[0].clientX);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleMouseUp);
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
@@ -55,7 +84,7 @@ export function BeforeAfterSection() {
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleMouseUp);
     };
-  }, [isDragging]);
+  }, [isDragging, handleMove]);
 
   return (
     <section className="py-16 md:py-24 bg-chantier-off-white">
@@ -75,8 +104,16 @@ export function BeforeAfterSection() {
         <div className="max-w-5xl mx-auto">
           <div
             ref={containerRef}
-            className="relative w-full aspect-[16/10] md:aspect-[16/9] overflow-hidden rounded-lg shadow-industrial-lg cursor-ew-resize select-none"
+            role="slider"
+            tabIndex={0}
+            aria-label="Curseur de comparaison avant / après"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(sliderPosition)}
+            aria-valuetext={`${Math.round(sliderPosition)} % de l'image « avant » visible`}
+            className="relative w-full aspect-[16/10] md:aspect-[16/9] overflow-hidden rounded-lg shadow-industrial-lg cursor-ew-resize select-none focus:outline-none focus-visible:ring-4 focus-visible:ring-chantier-yellow/60"
             onClick={handleClick}
+            onKeyDown={handleKeyDown}
           >
             {/* Image AFTER (Background - Full width) */}
             <div className="absolute inset-0 w-full h-full">
@@ -84,8 +121,8 @@ export function BeforeAfterSection() {
                 src="/images/home/comparison/suivi-construction-intermediaire-timelapse.webp"
                 alt="État avancé du gros œuvre en cours - Visualisation de l'avancement des travaux par caméra timelapse - Chantier Film"
                 fill
+                sizes="(max-width: 1024px) 100vw, 1024px"
                 className="object-cover"
-                priority
                 draggable={false}
               />
             </div>
@@ -101,8 +138,8 @@ export function BeforeAfterSection() {
                 src="/images/home/comparison/installation-chantier-btp-vue-initiale.webp"
                 alt="Début des travaux terrassement et fondations - Installation caméra timelapse solaire Chantier Film"
                 fill
+                sizes="(max-width: 1024px) 100vw, 1024px"
                 className="object-cover"
-                priority
                 draggable={false}
               />
             </div>
@@ -184,7 +221,7 @@ export function BeforeAfterSection() {
           {/* Instructions (Optional) */}
           <div className="mt-6 text-center">
             <p className="text-chantier-steel text-sm md:text-base">
-              <span className="hidden md:inline">Déplacez le curseur pour comparer • </span>
+              <span className="hidden md:inline">Déplacez le curseur (ou les flèches du clavier) pour comparer • </span>
               <span className="md:hidden">Glissez pour comparer • </span>
               <span className="font-semibold text-chantier-asphalt">Documentation complète de votre projet</span>
             </p>

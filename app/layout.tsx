@@ -4,6 +4,8 @@ import { Nunito } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import CookieConsent from '@/components/CookieConsent';
+import MotionProvider from '@/components/MotionProvider';
 
 const nunito = Nunito({
   subsets: ['latin'],
@@ -40,12 +42,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
-  // ✅ CORRECTION 1 : Favicon .ico en premier
   icons: {
     icon: [
       { url: '/favicons/favicon.ico', sizes: '48x48' },
       { url: '/favicons/favicon-96x96.png', type: 'image/png', sizes: '96x96' },
-      { url: '/favicons/favicon.svg', type: 'image/svg+xml' },
     ],
     shortcut: '/favicons/favicon.ico',
     apple: [
@@ -93,12 +93,11 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    google: '', // <-- Tu colleras ton code ici plus tard (ex: 'google-site-verification=...')
-  },
+  // La vérification Google Search Console est faite par DNS (TXT), pas de meta nécessaire.
 };
 
-// ✅ CORRECTION 3 : Ajout de la WebPage dans le JSON-LD
+// Schéma global (WebSite + Organization). Les WebPage sont définies par page
+// via components/JsonLd.tsx pour éviter de décrire la home sur les sous-pages.
 const jsonLdSchema = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -113,28 +112,6 @@ const jsonLdSchema = {
         'Transformez vos chantiers en actifs marketing. Suivi Timelapse 4K autonome & Drone pour le BTP. Valorisez votre savoir-faire et rassurez vos investisseurs.',
       publisher: {
         '@id': `${baseUrl}/#organization`,
-      },
-      inLanguage: 'fr-FR',
-    },
-    // ✅ NOUVEAU : WebPage pour la page d'accueil
-    {
-      '@type': 'WebPage',
-      '@id': `${baseUrl}/#webpage`,
-      url: baseUrl,
-      name: 'Chantier Film - Immortalisez Votre Chantier en Vidéo',
-      description:
-        'La solution de suivi de chantier, timelapse et drone dédiée aux pros du BTP. Visualisez l\'avancement de vos travaux et valorisez votre savoir-faire technique.',
-      isPartOf: {
-        '@id': `${baseUrl}/#website`,
-      },
-      about: {
-        '@id': `${baseUrl}/#organization`,
-      },
-      primaryImageOfPage: {
-        '@type': 'ImageObject',
-        url: `${baseUrl}/images/home/hero/suivi-chantier-drone-vue-aerienne-btp-1.webp`,
-        width: 1200,
-        height: 630,
       },
       inLanguage: 'fr-FR',
     },
@@ -226,9 +203,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema) }}
         />
         <GoogleAnalytics GA_MEASUREMENT_ID="G-S2FE5BSKWT" />
-        <Navbar />
-        {children}
-        <Footer />
+        <MotionProvider>
+          <Navbar />
+          {children}
+          <Footer />
+        </MotionProvider>
+        <CookieConsent />
       </body>
     </html>
   );

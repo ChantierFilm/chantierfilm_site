@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,6 +9,8 @@ import { Menu, X, Calendar } from 'lucide-react';
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const burgerRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,6 +20,28 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Menu mobile : fermeture par Échap, verrouillage du scroll, gestion du focus
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMobileMenuOpen(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    closeButtonRef.current?.focus();
+
+    const burgerButton = burgerRef.current;
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      burgerButton?.focus();
+    };
+  }, [isMobileMenuOpen]);
 
   const navLinks = [
     { href: '/', label: 'Accueil' },
@@ -41,9 +65,12 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-20 md:h-24 lg:h-20">
             {/* Hamburger Menu - Mobile & Tablette */}
             <button
+              ref={burgerRef}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="lg:hidden p-2 rounded-lg hover:bg-chantier-light-grey transition-colors"
-              aria-label="Menu"
+              aria-label={isMobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-menu"
             >
               {isMobileMenuOpen ? (
                 <X size={24} className="text-chantier-asphalt" />
@@ -113,15 +140,20 @@ export default function Navbar() {
             
             {/* Menu Sidebar */}
             <motion.div
+              id="mobile-menu"
               initial={{ x: -300 }}
               animate={{ x: 0 }}
               exit={{ x: -300 }}
               transition={{ type: 'tween', duration: 0.3 }}
               className="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white shadow-industrial-lg z-50 lg:hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menu de navigation"
             >
               <div className="p-6">
                 {/* Close Button */}
                 <button
+                  ref={closeButtonRef}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="absolute top-6 right-6 p-2 rounded-lg hover:bg-chantier-light-grey transition-colors"
                   aria-label="Fermer le menu"

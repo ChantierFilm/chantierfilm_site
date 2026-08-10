@@ -1,13 +1,36 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import ContactEmail from '@/components/emails/ContactTemplate';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// 5 messages max par IP et par tranche de 10 minutes
+const RATE_LIMIT = 5;
+const RATE_WINDOW_MS = 10 * 60 * 1000;
+
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const limit = rateLimit(`contact:${ip}`, RATE_LIMIT, RATE_WINDOW_MS);
+    if (!limit.success) {
+      return NextResponse.json(
+        { success: false, error: 'Trop de messages envoyés. Veuillez réessayer dans quelques minutes.' },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }
+      );
+    }
+
     const body = await request.json();
     const { name, email, phone, description } = body;
+
+    // Honeypot anti-spam : champ invisible rempli uniquement par les bots.
+    // On simule un succès pour ne pas leur signaler le blocage.
+    if (typeof body?.website === 'string' && body.website.trim().length > 0) {
+      return NextResponse.json({
+        success: true,
+        message: 'Votre demande a été envoyée avec succès',
+      });
+    }
 
     // Validation stricte
     if (!name || name.trim().length === 0) {
@@ -34,12 +57,23 @@ export async function POST(request: Request) {
 
     if (description && description.trim().length > 2000) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'La description est trop longue (max 2000 caractères)' 
+        {
+          success: false,
+          error: 'La description est trop longue (max 2000 caractères)'
         },
         { status: 400 }
       );
+    }
+
+    // Téléphone optionnel : longueur et format raisonnables
+    if (phone) {
+      const trimmedPhone = phone.trim();
+      if (trimmedPhone.length > 25 || !/^[+0-9().\-\s]*$/.test(trimmedPhone)) {
+        return NextResponse.json(
+          { success: false, error: 'Le numéro de téléphone est invalide' },
+          { status: 400 }
+        );
+      }
     }
 
     // Envoi de l'email via Resend
