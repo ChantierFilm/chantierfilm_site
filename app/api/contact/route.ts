@@ -80,8 +80,8 @@ export async function POST(request: Request) {
     const { data, error } = await resend.emails.send({
       from: 'Chantier Film <contact@chantierfilm.com>',
       to: ['contact@chantierfilm.com'],
-      replyTo: email.trim(),
-      subject: `Nouvelle demande de devis - ${name.trim()}`,
+      replyTo: 'contact@chantierfilm.com',
+      subject: `Nouvelle demande de devis - ${name.trim().replace(/[\r\n]+/g, ' ')}`,
       react: ContactEmail({
         name: name.trim(),
         email: email.trim(),
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
 
 // Fonction de validation email améliorée
 function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
   
   // Vérifications supplémentaires
   if (!emailRegex.test(email)) return false;
