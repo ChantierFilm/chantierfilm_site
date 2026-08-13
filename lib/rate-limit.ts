@@ -11,6 +11,10 @@ interface Bucket {
 
 const buckets = new Map<string, Bucket>();
 const MAX_BUCKETS = 5000;
+// Balayage de purge au plus une fois par minute (évite le balayage O(n)
+// de toute la Map à chaque requête une fois le seuil dépassé).
+const CLEANUP_INTERVAL_MS = 60_000;
+let lastCleanup = 0;
 
 export interface RateLimitResult {
   success: boolean;
@@ -22,16 +26,31 @@ export function rateLimit(key: string, limit: number, windowMs: number): RateLim
   const now = Date.now();
   const windowStart = now - windowMs;
 
-  // Nettoyage opportuniste pour éviter une croissance mémoire infinie
-  if (buckets.size > MAX_BUCKETS) {
+  // Purge périodique des buckets entièrement expirés (au plus une fois par
+  // minute, au lieu d'un balayage O(n) de toute la Map à chaque requête).
+  if (now - lastCleanup >= CLEANUP_INTERVAL_MS) {
     for (const [k, bucket] of buckets) {
       if (bucket.timestamps.every((t) => t <= windowStart)) {
         buckets.delete(k);
       }
     }
+    lastCleanup = now;
   }
 
-  const bucket = buckets.get(key) ?? { timestamps: [] };
+  let bucket = buckets.get(key);
+  if (!bucket) {
+    // La Map reste bornée : au-delà de MAX_BUCKETS, la clé la plus ancienne
+    // est évincée plutôt que de laisser la mémoire croître sans limite.
+    if (buckets.size >= MAX_BUCKETS) {
+      const oldestKey = buckets.keys().next().value;
+      if (oldestKey !== undefined) {
+        buckets.delete(oldestKey);
+      }
+    }
+    bucket = { timestamps: [] };
+    buckets.set(key, bucket);
+  }
+
   bucket.timestamps = bucket.timestamps.filter((t) => t > windowStart);
 
   if (bucket.timestamps.length >= limit) {
@@ -44,8 +63,6 @@ export function rateLimit(key: string, limit: number, windowMs: number): RateLim
   }
 
   bucket.timestamps.push(now);
-  buckets.set(key, bucket);
-
   return {
     success: true,
     remaining: limit - bucket.timestamps.length,
@@ -54,9 +71,27 @@ export function rateLimit(key: string, limit: number, windowMs: number): RateLim
 }
 
 export function getClientIp(request: Request): string {
+  // Seul le dernier élément de X-Forwarded-For est ajouté par le proxy de
+  // confiance (Vercel/CDN) ; les précédents sont contrôlables par le client.
+  // Les valeurs sont validées et bornées (45 caractères max) pour empêcher
+  // l'injection de clés arbitraires ou surdimensionnées.
   const forwardedFor = request.headers.get('x-forwarded-for');
   if (forwardedFor) {
-    return forwardedFor.split(',')[0].trim();
+    const candidates = forwardedFor.split(',');
+    for (let i = candidates.length - 1; i >= 0; i--) {
+      const candidate = candidates[i].trim();
+      if (isValidIp(candidate)) {
+        return candidate;
+      }
+    }
   }
-  return request.headers.get('x-real-ip') ?? 'unknown';
+  const realIp = request.headers.get('x-real-ip')?.trim();
+  if (realIp && isValidIp(realIp)) {
+    return realIp;
+  }
+  return 'unknown';
+}
+
+function isValidIp(value: string): boolean {
+  return value.length <= 45 && /^[0-9a-fA-F:.]+$/.test(value);
 }

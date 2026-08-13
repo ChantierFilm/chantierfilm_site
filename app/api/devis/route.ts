@@ -22,7 +22,7 @@ const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 
 function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
   if (!emailRegex.test(email)) return false;
   if (email.length > 254) return false;
   const [localPart, domain] = email.split('@');
@@ -135,9 +135,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const subjectCompany = data.company ? ` — ${data.company}` : '';
-    const prospectSubject = `Votre estimation Chantier Film — ${data.fullName}`;
-    const internalSubject = `Nouveau devis en ligne — ${data.fullName}${subjectCompany}`;
+    const sanitizeSubjectPart = (value: string) => value.replace(/[\r\n]+/g, ' ').trim();
+    const subjectCompany = data.company ? ` — ${sanitizeSubjectPart(data.company)}` : '';
+    const prospectSubject = `Votre estimation Chantier Film — ${sanitizeSubjectPart(data.fullName)}`;
+    const internalSubject = `Nouveau devis en ligne — ${sanitizeSubjectPart(data.fullName)}${subjectCompany}`;
 
     const [prospectResult, internalResult] = await Promise.all([
       resend.emails.send({
@@ -150,7 +151,7 @@ export async function POST(request: Request) {
       resend.emails.send({
         from: FROM,
         to: [INTERNAL_TO],
-        replyTo: email,
+        replyTo: INTERNAL_TO,
         subject: internalSubject,
         react: DevisNotificationEmail({ data }),
       }),
