@@ -41,6 +41,13 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: '/projet-e-leclerc-remiremont/:path*',
+        headers: [
+          ...securityHeaders,
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+      {
         source: '/:path*',
         headers: securityHeaders,
       },
