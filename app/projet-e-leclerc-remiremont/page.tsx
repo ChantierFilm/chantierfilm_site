@@ -8,7 +8,7 @@ const base = '/projets/e-leclerc-remiremont';
 const cameraGroups: CameraGroup[] = [
   {
     id: 'camera-a',
-    name: 'Caméra A — Façade principale',
+    name: 'Caméra principale — Façade principale',
     subtitle:
       "Quatre emplacements possibles. L'emplacement A1 nécessite un perçage de la toiture (tôle) ; les emplacements A2 et A3 évitent ce perçage mais ne couvrent pas la phase 2. L'emplacement A4 couvre la phase 2 mais impose également un perçage de la tôle.",
     note: "À noter : pour couvrir la phase 2 du chantier, un perçage de la tôle est de toute façon nécessaire (en A1 directement, ou en A4 après un déplacement).",
@@ -53,10 +53,10 @@ const cameraGroups: CameraGroup[] = [
   },
   {
     id: 'camera-b',
-    name: 'Caméra B — Phase 1',
+    name: 'Caméra secondaire — Phase 1',
     subtitle:
       "Trois emplacements possibles pour la phase 1. En l'absence de possibilité de percer la tôle, la fixation peut se faire directement sur les supports métalliques existants.",
-    note: "La caméra B est la caméra 2. Si elle est placée en B1, elle sera déplacée en C1 pour la phase 2.",
+    note: "La caméra secondaire placée en B1 sera déplacée en C1 pour la phase 2.",
     views: [
       {
         id: 'B1',
@@ -89,9 +89,9 @@ const cameraGroups: CameraGroup[] = [
   },
   {
     id: 'camera-c',
-    name: 'Caméra C — Phase 2',
+    name: 'Caméra secondaire — Phase 2',
     subtitle:
-      "Pour la phase 2, la caméra 2 est déplacée sur le candélabre de la rue, offrant un bel angle de vue sur l'ensemble du chantier.",
+      "Pour la phase 2, la caméra secondaire est déplacée sur le candélabre de la rue, offrant un bel angle de vue sur l'ensemble du chantier.",
     note: "Une autorisation sera demandée à la mairie (aucune difficulté attendue).",
     views: [
       {
