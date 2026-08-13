@@ -151,8 +151,8 @@ export default function ProjetLeclercPage() {
                 </div>
               </div>
               <div className="flex items-start gap-4 px-5 py-6 sm:px-7">
-                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-chantier-asphalt text-xl font-extrabold text-chantier-yellow">
-                  B → C
+                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-chantier-asphalt text-sm font-extrabold text-chantier-yellow">
+                  B→C
                 </span>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-chantier-concrete">
