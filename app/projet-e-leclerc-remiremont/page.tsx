@@ -123,6 +123,50 @@ export default function ProjetLeclercPage() {
             Étude d&apos;implantation des caméras de suivi de chantier. Plan général
             interactif puis rendus des vues pour chaque emplacement proposé.
           </p>
+
+          {/* Récapitulatif des caméras */}
+          <div className="mt-8 overflow-hidden rounded-2xl border-2 border-chantier-asphalt shadow-industrial-lg">
+            <div className="bg-chantier-yellow px-5 py-3 sm:px-7">
+              <h2 className="text-sm font-extrabold uppercase tracking-widest text-chantier-asphalt">
+                Les deux caméras en un coup d&apos;œil
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 divide-y divide-chantier-asphalt/15 bg-white sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+              <div className="flex items-start gap-4 px-5 py-6 sm:px-7">
+                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-chantier-asphalt text-xl font-extrabold text-chantier-yellow">
+                  A
+                </span>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-chantier-concrete">
+                    Caméra principale
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-chantier-asphalt">
+                    C&apos;est la caméra <strong>A</strong>. Quelle que soit la position
+                    (A1, A2, A3 ou A4), elle garde toujours le même angle de vue.
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-chantier-concrete">
+                    Si le perçage de la tôle n&apos;est pas possible, elle est posée en A2
+                    ou A3, puis déplacée en A4 pour la phase 2 — sans changer d&apos;angle.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4 px-5 py-6 sm:px-7">
+                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-chantier-asphalt text-sm font-extrabold text-chantier-yellow">
+                  B→C
+                </span>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-chantier-concrete">
+                    Caméra secondaire
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-chantier-asphalt">
+                    C&apos;est la caméra <strong>B</strong>. Peu importe l&apos;option
+                    choisie, elle sera déplacée et deviendra <strong>C</strong> à la
+                    seconde phase des travaux.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
