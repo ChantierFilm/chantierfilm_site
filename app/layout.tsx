@@ -113,7 +113,6 @@ const jsonLdSchema = {
       '@id': `${baseUrl}/#website`,
       url: baseUrl,
       name: 'Chantier Film',
-      alternateName: ['ChantierFilm', 'Chantier-Film'],
       description:
         'Transformez vos chantiers en actifs marketing. Suivi Timelapse 4K autonome & Drone pour le BTP. Valorisez votre savoir-faire et rassurez vos investisseurs.',
       publisher: {
@@ -126,7 +125,6 @@ const jsonLdSchema = {
       '@type': 'ProfessionalService',
       '@id': `${baseUrl}/#organization`,
       name: 'Chantier Film',
-      alternateName: ['ChantierFilm'],
       url: baseUrl,
       logo: {
         '@type': 'ImageObject',
