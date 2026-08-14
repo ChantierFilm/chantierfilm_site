@@ -9,6 +9,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 1,
+      images: [
+        `${baseUrl}/images/home/hero/suivi-chantier-drone-vue-aerienne-btp-1.webp`,
+      ],
     },
     {
       url: `${baseUrl}/realisations`,

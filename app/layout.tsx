@@ -68,6 +68,12 @@ export const metadata: Metadata = {
       'Capturation professionnelle de chantiers avec drone et timelapse. Documentation complète et suivi en temps réel.',
     images: [
       {
+        url: `/images/home/hero/suivi-chantier-drone-vue-aerienne-btp-1.webp`,
+        width: 1920,
+        height: 952,
+        alt: 'Vue aérienne par drone d\'un chantier BTP en cours - Suivi de chantier Chantier Film',
+      },
+      {
         url: `/images/chantier-film-suivi-chantier-timelapse-drone-btp-social.jpg`,
         width: 1200,
         height: 630,
@@ -129,6 +135,8 @@ const jsonLdSchema = {
       image: {
         '@type': 'ImageObject',
         url: `${baseUrl}/images/home/hero/suivi-chantier-drone-vue-aerienne-btp-1.webp`,
+        width: 1920,
+        height: 952,
       },
       description:
         'Expert en suivi de chantier vidéo, timelapse et drone pour le BTP et l\'industrie. Documentation complète de projets de construction.',

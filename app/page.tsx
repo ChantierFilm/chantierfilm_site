@@ -14,6 +14,12 @@ export default function Home() {
         path="/"
         name="Chantier Film - Immortalisez Votre Chantier en Vidéo"
         description="La solution de suivi de chantier, timelapse et drone dédiée aux pros du BTP. Visualisez l'avancement de vos travaux et valorisez votre savoir-faire technique."
+        primaryImageOfPage={{
+          url: 'https://www.chantierfilm.com/images/home/hero/suivi-chantier-drone-vue-aerienne-btp-1.webp',
+          width: 1920,
+          height: 952,
+          alt: 'Vue aérienne par drone d\'un chantier BTP en cours - Suivi de chantier Chantier Film',
+        }}
       />
       {/* Hero Section - Premier point de contact */}
       <HeroSection />
