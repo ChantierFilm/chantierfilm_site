@@ -6,7 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/projet-e-leclerc-remiremont'],
       },
     ],
     sitemap: 'https://www.chantierfilm.com/sitemap.xml',
